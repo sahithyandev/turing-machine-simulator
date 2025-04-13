@@ -1,13 +1,15 @@
 import { html } from "./utils";
 
-const app = document.querySelector<HTMLDivElement>("#app");
+const app = document.querySelector<HTMLElement>("main");
 
-if (!(app instanceof HTMLDivElement)) {
-  throw new Error("App element not found");
+if (!(app instanceof HTMLElement)) {
+  throw new Error("main element not found");
 }
 
 app.innerHTML = html`
-  <main>
-    <h1>Hello World!</h1>
-  </main>
+  <div className="grid grid-cols-2">
+    <section>
+      <h1>Turing Machine Simulator</h1>
+    </section>
+  </div>
 `;
