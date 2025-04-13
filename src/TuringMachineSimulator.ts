@@ -1,3 +1,4 @@
+import { preview } from "vite";
 import { html } from "./utils";
 
 interface ProgramStatement {
@@ -20,7 +21,7 @@ class ProgramEditor {
     for (let i = 0; i < this.statements.length; i++) {
       const statement = this.statements[i];
       s = s.concat(
-        html`<div class="statement">
+        html`<div class="statement" id="${statement.currentState}-${statement.input}">
           <span>${(i + 1).toString().padStart(2, "0")}</span>
           ${statement.currentState} ${statement.input} : ${statement.nextState} ${statement.output} ${statement.action}
         </div>`,
@@ -29,6 +30,26 @@ class ProgramEditor {
 
     s = s.concat("</div>");
     return s;
+  }
+
+  highlightActiveStatement(container: HTMLElement, currentState: string, input: string) {
+    const previousActiveStatement = container.querySelector(".program-editor .statement.active");
+
+    if (previousActiveStatement) {
+      previousActiveStatement.classList.remove("active");
+    }
+
+    for (let i = 0; i < this.statements.length; i++) {
+      const statement = this.statements[i];
+      if (statement.currentState === currentState && statement.input === input) {
+        const statementElement = container.querySelector(`.statement#${statement.currentState}-${statement.input}`);
+        console.log(statementElement);
+        if (statementElement) {
+          statementElement.classList.add("active");
+        }
+        break;
+      }
+    }
   }
 }
 
@@ -41,6 +62,13 @@ class Tape {
 
   stringify(): string {
     return this.value.join(",");
+  }
+  read(position: number) {
+    return this.value[position];
+  }
+
+  write(position: number, value: string) {
+    this.value[position] = value;
   }
 
   render(headPosition: number) {
@@ -183,5 +211,7 @@ export class TuringMachineSimulator {
         <section class="canvas">${this.currentTape.render(this.headPosition)}</section>
       </div>
     `;
+
+    this.editor.highlightActiveStatement(this.container, this.currentState, this.currentTape.read(this.headPosition));
   }
 }

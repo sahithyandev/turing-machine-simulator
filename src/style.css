@@ -43,9 +43,12 @@ input[type="text"] {
 
 .program-editor {
     @apply font-mono;
-
     .statement {
         @apply p-2 mt-2 rounded-md bg-stone-700/50;
+
+        &.active {
+            @apply bg-pink-400/20;
+        }
 
         span {
             @apply opacity-50 mr-2;
