@@ -52,3 +52,22 @@ input[type="text"] {
         }
     }
 }
+
+.canvas {
+    @apply flex flex-col items-center justify-center;
+
+    .tape {
+        @apply rounded-md flex border border-gray-500/50;
+
+        .cell {
+            @apply bg-stone-700/50 border-r border-gray-500/50 p-2 size-18 inline-flex justify-center items-center text-2xl font-medium;
+
+            &:last-child {
+                border-right: none;
+            }
+            &.head {
+                @apply bg-blue-400/20;
+            }
+        }
+    }
+}

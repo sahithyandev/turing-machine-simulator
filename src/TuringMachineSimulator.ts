@@ -32,16 +32,54 @@ class ProgramEditor {
   }
 }
 
+class Tape {
+  value: string[];
+
+  constructor(initialValue: string[]) {
+    this.value = initialValue;
+  }
+
+  stringify(): string {
+    return this.value.join(",");
+  }
+
+  render(headPosition: number) {
+    let s = `<div class="tape">`;
+    for (let i = 0; i < this.value.length; i++) {
+      if (i === headPosition) {
+        s = s.concat(`<div class="cell head">${this.value[i]}</div>`);
+      } else {
+        s = s.concat(`<div class="cell">${this.value[i]}</div>`);
+      }
+    }
+    s = s.concat("</div>");
+    return s;
+  }
+
+  updateHeadPosition(container: HTMLElement, newHeadPosition: number) {
+    const previousHead = container.querySelector(".tape .cell.head");
+    if (previousHead) {
+      previousHead.classList.remove("head");
+    }
+    const newHead = container.querySelector(`.tape .cell:nth-child(${newHeadPosition + 1})`);
+    if (newHead) {
+      newHead.classList.add("head");
+    }
+  }
+}
+
 export class TuringMachineSimulator {
   container: HTMLElement;
   currentState: string;
-  currentTape: string[];
+  currentTape: Tape;
+  headPosition: number;
   editor: ProgramEditor;
 
   constructor(container: HTMLElement) {
     this.container = container;
     this.currentState = "Q0";
-    this.currentTape = ["b", "b", "b", "1", "1", "b", "b"];
+    this.currentTape = new Tape(["b", "b", "b", "1", "1", "b", "b"]);
+    this.headPosition = 3;
 
     this.editor = new ProgramEditor([
       {
@@ -132,9 +170,9 @@ export class TuringMachineSimulator {
           <input
             id="initial-tape"
             type="text"
-            value="${this.currentTape.join(",")}"
+            value="${this.currentTape.stringify()}"
             class="font-mono block p-2 w-full"
-            / >
+          />
 
           <label class="text-lg font-medium mt-4 mb-1 block" for="initial-state">Initial State</label>
           <input id="initial-state" type="text" value="${this.currentState}" class="font-mono block p-2 w-full" />
@@ -142,6 +180,7 @@ export class TuringMachineSimulator {
           <h2 class="text-lg font-medium mt-4 mb-1">Program Editor</h2>
           ${this.editor.render()}
         </section>
+        <section class="canvas">${this.currentTape.render(this.headPosition)}</section>
       </div>
     `;
   }
