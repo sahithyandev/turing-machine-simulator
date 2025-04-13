@@ -11,6 +11,8 @@ interface ProgramStatement {
 
 class ProgramEditor {
   statements: ProgramStatement[];
+  activeStatement: ProgramStatement | null = null;
+
   constructor(initialStatements: Array<ProgramStatement>) {
     this.statements = initialStatements;
   }
@@ -33,8 +35,8 @@ class ProgramEditor {
   }
 
   highlightActiveStatement(container: HTMLElement, currentState: string, input: string) {
+    this.activeStatement = null;
     const previousActiveStatement = container.querySelector(".program-editor .statement.active");
-
     if (previousActiveStatement) {
       previousActiveStatement.classList.remove("active");
     }
@@ -42,8 +44,8 @@ class ProgramEditor {
     for (let i = 0; i < this.statements.length; i++) {
       const statement = this.statements[i];
       if (statement.currentState === currentState && statement.input === input) {
+        this.activeStatement = statement;
         const statementElement = container.querySelector(`.statement#${statement.currentState}-${statement.input}`);
-        console.log(statementElement);
         if (statementElement) {
           statementElement.classList.add("active");
         }
@@ -67,17 +69,21 @@ class Tape {
     return this.value[position];
   }
 
-  write(position: number, value: string) {
+  write(container: HTMLElement, position: number, value: string) {
     this.value[position] = value;
+    const element = container.querySelector(`#tape-cell-${position}`);
+    if (element) {
+      element.innerHTML = value;
+    }
   }
 
   render(headPosition: number) {
     let s = `<div class="tape">`;
     for (let i = 0; i < this.value.length; i++) {
       if (i === headPosition) {
-        s = s.concat(`<div class="cell head">${this.value[i]}</div>`);
+        s = s.concat(`<div class="cell head" id="tape-cell-${i}">${this.value[i]}</div>`);
       } else {
-        s = s.concat(`<div class="cell">${this.value[i]}</div>`);
+        s = s.concat(`<div class="cell" id="tape-cell-${i}">${this.value[i]}</div>`);
       }
     }
     s = s.concat("</div>");
@@ -89,7 +95,8 @@ class Tape {
     if (previousHead) {
       previousHead.classList.remove("head");
     }
-    const newHead = container.querySelector(`.tape .cell:nth-child(${newHeadPosition + 1})`);
+
+    const newHead = container.querySelector(`#tape-cell-${newHeadPosition}`);
     if (newHead) {
       newHead.classList.add("head");
     }
@@ -106,8 +113,8 @@ export class TuringMachineSimulator {
   constructor(container: HTMLElement) {
     this.container = container;
     this.currentState = "Q0";
-    this.currentTape = new Tape(["b", "b", "b", "1", "1", "b", "b"]);
-    this.headPosition = 3;
+    this.currentTape = new Tape(["b", "b", "b", "b", "1", "1", "1", "b", "b"]);
+    this.headPosition = 4;
 
     this.editor = new ProgramEditor([
       {
@@ -208,10 +215,64 @@ export class TuringMachineSimulator {
           <h2 class="text-lg font-medium mt-4 mb-1">Program Editor</h2>
           ${this.editor.render()}
         </section>
-        <section class="canvas">${this.currentTape.render(this.headPosition)}</section>
+        <section class="canvas">
+          <div>
+            <h2 class="text-xl mb-1 font-medium">Current Tape</h2>
+            ${this.currentTape.render(this.headPosition)}
+
+            <h2 class="text-xl mb-1 mt-4 font-medium">Current State</h2>
+            <span id="current-state" class="font-mono mt-10 mb-4 text-xl"> ${this.currentState} </span>
+            <div class="flex justify-end gap-5 items-center">
+              <span id="halted-message" class="hidden">The machine has halted.</span>
+              <button id="next-btn">Next</button>
+            </div>
+          </div>
+        </section>
       </div>
     `;
 
     this.editor.highlightActiveStatement(this.container, this.currentState, this.currentTape.read(this.headPosition));
+    this.addEventListeners();
+  }
+
+  nextStep() {
+    if (!this.editor.activeStatement) return;
+
+    this.currentState = this.editor.activeStatement.nextState;
+    const currentStateEl = this.container.querySelector("#current-state");
+    if (currentStateEl) {
+      currentStateEl.textContent = this.currentState;
+    }
+
+    this.currentTape.write(this.container, this.headPosition, this.editor.activeStatement.output);
+
+    switch (this.editor.activeStatement.action) {
+      case "L":
+        this.headPosition -= 1;
+        break;
+      case "R":
+        this.headPosition += 1;
+        break;
+      case "H": {
+        const haltedMessageElement = this.container.querySelector("#halted-message");
+        if (haltedMessageElement) {
+          haltedMessageElement.classList.remove("hidden");
+        }
+        const nextBtn = this.container.querySelector("#next-btn");
+        if (nextBtn instanceof HTMLButtonElement) {
+          nextBtn.disabled = true;
+        }
+        return;
+      }
+    }
+    this.currentTape.updateHeadPosition(this.container, this.headPosition);
+    this.editor.highlightActiveStatement(this.container, this.currentState, this.currentTape.read(this.headPosition));
+  }
+
+  addEventListeners() {
+    const nextBtn = this.container.querySelector("#next-btn");
+    if (nextBtn instanceof HTMLButtonElement) {
+      nextBtn.addEventListener("click", () => this.nextStep());
+    }
   }
 }

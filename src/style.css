@@ -28,13 +28,18 @@ button {
     background-color: #1a1a1a;
     cursor: pointer;
     transition: border-color 0.25s;
-}
-button:hover {
-    border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    &:focus,
+    &:not(:disabled):hover {
+        @apply border-pink-500/60;
+    }
+    &:focus-visible {
+        outline: 4px auto -webkit-focus-ring-color;
+    }
 }
 
 input[type="text"] {
@@ -69,7 +74,7 @@ input[type="text"] {
                 border-right: none;
             }
             &.head {
-                @apply bg-blue-400/20;
+                @apply bg-pink-500/20;
             }
         }
     }
