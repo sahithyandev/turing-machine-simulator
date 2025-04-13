@@ -21,6 +21,7 @@ class ProgramEditor {
       const statement = this.statements[i];
       s = s.concat(
         html`<div class="statement">
+          <span>${(i + 1).toString().padStart(2, "0")}</span>
           ${statement.currentState} ${statement.input} : ${statement.nextState} ${statement.output} ${statement.action}
         </div>`,
       );
@@ -33,10 +34,14 @@ class ProgramEditor {
 
 export class TuringMachineSimulator {
   container: HTMLElement;
+  currentState: string;
+  currentTape: string[];
   editor: ProgramEditor;
 
   constructor(container: HTMLElement) {
     this.container = container;
+    this.currentState = "Q0";
+    this.currentTape = ["b", "b", "b", "1", "1", "b", "b"];
 
     this.editor = new ProgramEditor([
       {
@@ -123,12 +128,18 @@ export class TuringMachineSimulator {
         <section class="bg-stone-900/40 h-full px-3 py-2">
           <h1 class="mb-4 font-semibold text-2xl">Turing Machine Simulator</h1>
 
-          <h2 class="text-lg font-medium mb-3">Tape</h2>
-          <div></div>
+          <label class="block text-lg font-medium mt-4 mb-1">Initial Tape</label>
+          <input
+            id="initial-tape"
+            type="text"
+            value="${this.currentTape.join(",")}"
+            class="font-mono block p-2 w-full"
+            / >
 
-          <h2 class="text-lg font-medium mb-3">Initial State</h2>
+          <label class="text-lg font-medium mt-4 mb-1 block" for="initial-state">Initial State</label>
+          <input id="initial-state" type="text" value="${this.currentState}" class="font-mono block p-2 w-full" />
 
-          <h2 class="text-lg font-medium mb-3">Program Editor</h2>
+          <h2 class="text-lg font-medium mt-4 mb-1">Program Editor</h2>
           ${this.editor.render()}
         </section>
       </div>
