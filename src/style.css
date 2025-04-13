@@ -36,3 +36,11 @@ button:focus,
 button:focus-visible {
     outline: 4px auto -webkit-focus-ring-color;
 }
+
+.program-editor {
+    @apply font-mono;
+
+    .statement {
+        @apply p-2 mt-1 rounded-md bg-stone-700/50;
+    }
+}
