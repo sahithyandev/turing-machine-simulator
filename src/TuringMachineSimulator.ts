@@ -232,7 +232,7 @@ export class TuringMachineSimulator {
 
 		this.container.innerHTML = html`
       <div class="grid grid-cols-1 lg:grid-cols-[400px_1fr] h-screen">
-        <section class="lg:bg-stone-900/40 h-fit lg:h-full px-3 py-2">
+        <section class="lg:bg-stone-900/40 h-fit lg:h-full px-3 py-2 flex flex-col">
           <h1 class="mb-4 font-semibold text-2xl">Turing Machine Simulator</h1>
 
           <label class="block text-lg font-medium mt-2 mb-1">Initial Tape</label>
@@ -243,21 +243,23 @@ export class TuringMachineSimulator {
             class="font-mono block p-2 w-full"
           />
 
-          <label class="text-lg font-medium mt-2 mb-1 block" for="initial-state">Initial State</label>
-          <input id="initial-state" type="text" value="${this.currentState}" class="font-mono block p-2 w-full" />
+          <div class="grid grid-cols-2 grid-flow-col grid-rows-2 gap-x-2">
+            <label class="text-lg font-medium mt-2 mb-1 block" for="initial-state">Initial State</label>
+            <input id="initial-state" type="text" value="${this.currentState}" class="font-mono block p-2 w-full" />
 
-          <label class="text-lg font-medium mt-2 mb-1 block" for="initial-head-position">Initial Head Position</label>
-          <input
-            id="initial-head-position"
-            type="number"
-            value="${this.headPosition + 1}"
-            class="font-mono block p-2 w-full"
-          />
-
-          <button class="mt-2 w-full" id="rebuild-machine-btn">Rebuild machine</button>
+            <label class="text-lg font-medium mt-2 mb-1 block" for="initial-head-position">Initial Head Position</label>
+            <input
+              id="initial-head-position"
+              type="number"
+              value="${this.headPosition + 1}"
+              class="font-mono block p-2 w-full"
+            />
+          </div>
 
           <h2 class="text-lg font-medium mt-4 mb-1">Program Editor</h2>
           ${this.editor.render()}
+
+          <button class="mt-auto w-full" id="rebuild-machine-btn">Rebuild machine</button>
         </section>
         <section class="canvas">
           <div>
