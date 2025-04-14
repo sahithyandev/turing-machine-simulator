@@ -77,7 +77,7 @@ class Tape {
   }
 
   render(headPosition: number) {
-    let s = `<div class="tape">`;
+    let s = "";
     for (let i = 0; i < this.value.length; i++) {
       if (i === headPosition) {
         s = s.concat(`<div class="cell head" id="tape-cell-${i}">${this.value[i]}</div>`);
@@ -85,7 +85,6 @@ class Tape {
         s = s.concat(`<div class="cell" id="tape-cell-${i}">${this.value[i]}</div>`);
       }
     }
-    s = s.concat("</div>");
     return s;
   }
 
@@ -200,7 +199,7 @@ export class TuringMachineSimulator {
         <section class="lg:bg-stone-900/40 h-fit lg:h-full px-3 py-2">
           <h1 class="mb-4 font-semibold text-2xl">Turing Machine Simulator</h1>
 
-          <label class="block text-lg font-medium mt-4 mb-1">Initial Tape</label>
+          <label class="block text-lg font-medium mt-2 mb-1">Initial Tape</label>
           <input
             id="initial-tape"
             type="text"
@@ -208,8 +207,18 @@ export class TuringMachineSimulator {
             class="font-mono block p-2 w-full"
           />
 
-          <label class="text-lg font-medium mt-4 mb-1 block" for="initial-state">Initial State</label>
+          <label class="text-lg font-medium mt-2 mb-1 block" for="initial-state">Initial State</label>
           <input id="initial-state" type="text" value="${this.currentState}" class="font-mono block p-2 w-full" />
+
+          <label class="text-lg font-medium mt-2 mb-1 block" for="initial-head-position">Initial Head Position</label>
+          <input
+            id="initial-head-position"
+            type="number"
+            value="${this.headPosition + 1}"
+            class="font-mono block p-2 w-full"
+          />
+
+          <button class="mt-2 w-full" id="rebuild-machine-btn">Rebuild machine</button>
 
           <h2 class="text-lg font-medium mt-4 mb-1">Program Editor</h2>
           ${this.editor.render()}
@@ -217,7 +226,7 @@ export class TuringMachineSimulator {
         <section class="canvas">
           <div>
             <h2 class="text-xl mb-1 font-medium">Current Tape</h2>
-            ${this.currentTape.render(this.headPosition)}
+            <div class="tape">${this.currentTape.render(this.headPosition)}</div>
 
             <div class="flex justify-between gap-5 items-center">
               <div>
@@ -270,10 +279,46 @@ export class TuringMachineSimulator {
     this.editor.highlightActiveStatement(this.container, this.currentState, this.currentTape.read(this.headPosition));
   }
 
+  rebuildMachine() {
+    const initialTapeInputElement = this.container.querySelector("#initial-tape");
+    if (!(initialTapeInputElement instanceof HTMLInputElement)) return;
+
+    const initialStateInputElement = this.container.querySelector("#initial-state");
+    if (!(initialStateInputElement instanceof HTMLInputElement)) return;
+
+    const initialHeadPositionInputElement = this.container.querySelector("#initial-head-position");
+    if (!(initialHeadPositionInputElement instanceof HTMLInputElement)) return;
+
+    const initialTape = initialTapeInputElement.value;
+    const initialState = initialStateInputElement.value;
+    const initialHeadPosition = initialHeadPositionInputElement.valueAsNumber;
+
+    this.headPosition = initialHeadPosition;
+
+    this.currentTape.value = initialTape.split(",");
+
+    const tape = this.container.querySelector(".tape");
+    if (tape) {
+      tape.innerHTML = this.currentTape.render(this.headPosition);
+    }
+
+    if (this.currentState !== initialState) {
+      this.currentState = initialState;
+      this.editor.highlightActiveStatement(this.container, this.currentState, this.currentTape.read(this.headPosition));
+    } else {
+      this.currentState = initialState;
+    }
+  }
+
   addEventListeners() {
     const nextBtn = this.container.querySelector("#next-btn");
     if (nextBtn instanceof HTMLButtonElement) {
       nextBtn.addEventListener("click", () => this.nextStep());
+    }
+
+    const rebuildBtn = this.container.querySelector("#rebuild-machine-btn");
+    if (rebuildBtn instanceof HTMLButtonElement) {
+      rebuildBtn.addEventListener("click", () => this.rebuildMachine());
     }
   }
 }
