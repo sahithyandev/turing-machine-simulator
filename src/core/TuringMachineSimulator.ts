@@ -142,26 +142,40 @@ export class TuringMachineSimulator {
           <h2 class="text-lg font-medium mt-4 mb-1">Program Editor</h2>
           ${this.editor.render()}
 
-          <button class="mt-auto w-full" id="rebuild-machine-btn">Rebuild machine</button>
+          <button class="mt-auto w-full" id="build-machine-btn">Build machine</button>
         </section>
         <section class="canvas">
-          <div>
-            <h2 class="text-xl mb-1 font-medium">Current Tape</h2>
-            <div class="tape">${this.currentTape.render(this.headPosition)}</div>
-
-            <div class="flex justify-end mt-4 gap-5 items-center">
-              <button id="next-btn">Next</button>
-            </div>
-
-            <p id="explanation" class="max-w-prose mt-5 text-lg"></p>
-          </div>
+          <div></div>
         </section>
       </div>
     `;
 
+		this.renderEmptyCanvas();
 		this.addEventListeners();
-		this.renderExplanation();
-		this.highlightActiveStatement();
+	}
+
+	renderEmptyCanvas() {
+		const canvasElement = this.container.querySelector(".canvas");
+		if (!canvasElement) return;
+		canvasElement.innerHTML = html`<div class="text-2xl">Build the machine to visualize it.</div>`;
+	}
+
+	renderMachine() {
+		const canvasElement = this.container.querySelector(".canvas");
+		if (!canvasElement) return;
+		canvasElement.innerHTML = html`<div>
+      <h2 class="text-xl mb-1 font-medium">Current Tape</h2>
+      <div class="tape">${this.currentTape.render(this.headPosition)}</div>
+      <div class="flex justify-end mt-4 gap-5 items-center">
+        <button id="next-btn">Next</button>
+      </div>
+      <p id="explanation" class="max-w-prose mt-5 text-lg"></p>
+    </div>`;
+
+		const nextBtn = this.container.querySelector("#next-btn");
+		if (nextBtn instanceof HTMLButtonElement) {
+			nextBtn.addEventListener("click", () => this.nextStep());
+		}
 	}
 
 	highlightActiveStatement() {
@@ -243,7 +257,7 @@ export class TuringMachineSimulator {
 		this.renderExplanation();
 	}
 
-	rebuildMachine() {
+	buildMachine() {
 		const initialTapeInputElement =
 			this.container.querySelector("#initial-tape");
 		if (!(initialTapeInputElement instanceof HTMLInputElement)) return;
@@ -271,19 +285,15 @@ export class TuringMachineSimulator {
 		}
 
 		this.currentState = initialState;
+		this.renderMachine();
 		this.highlightActiveStatement();
 		this.renderExplanation();
 	}
 
 	addEventListeners() {
-		const nextBtn = this.container.querySelector("#next-btn");
-		if (nextBtn instanceof HTMLButtonElement) {
-			nextBtn.addEventListener("click", () => this.nextStep());
-		}
-
-		const rebuildBtn = this.container.querySelector("#rebuild-machine-btn");
-		if (rebuildBtn instanceof HTMLButtonElement) {
-			rebuildBtn.addEventListener("click", () => this.rebuildMachine());
+		const buildMachineBtn = this.container.querySelector("#build-machine-btn");
+		if (buildMachineBtn instanceof HTMLButtonElement) {
+			buildMachineBtn.addEventListener("click", () => this.buildMachine());
 		}
 	}
 }
