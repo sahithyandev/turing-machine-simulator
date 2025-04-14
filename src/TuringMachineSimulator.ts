@@ -345,7 +345,7 @@ export class TuringMachineSimulator {
     const initialState = initialStateInputElement.value;
     const initialHeadPosition = initialHeadPositionInputElement.valueAsNumber;
 
-    this.headPosition = initialHeadPosition;
+    this.headPosition = initialHeadPosition - 1;
 
     this.currentTape.value = initialTape.split(",");
 
@@ -354,13 +354,9 @@ export class TuringMachineSimulator {
       tape.innerHTML = this.currentTape.render(this.headPosition);
     }
 
-    if (this.currentState !== initialState) {
-      this.currentState = initialState;
-
-      this.highlightActiveStatement();
-    } else {
-      this.currentState = initialState;
-    }
+    this.currentState = initialState;
+    this.highlightActiveStatement();
+    this.renderExplanation();
   }
 
   addEventListeners() {
