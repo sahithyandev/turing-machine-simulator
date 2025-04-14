@@ -122,12 +122,14 @@ export class TuringMachineSimulator {
   currentTape: Tape;
   headPosition: number;
   editor: ProgramEditor;
+  isRunning: boolean;
 
   constructor(container: HTMLElement) {
     this.container = container;
     this.currentState = "Q0";
     this.currentTape = new Tape(["b", "b", "b", "b", "1", "1", "1", "b", "b"]);
     this.headPosition = 4;
+    this.isRunning = true;
 
     this.editor = new ProgramEditor([
       {
@@ -209,11 +211,6 @@ export class TuringMachineSimulator {
       },
     ]);
 
-    const activeStatement = this.editor.findActiveStatement(
-      this.currentState,
-      this.currentTape.read(this.headPosition),
-    );
-
     this.container.innerHTML = html`
       <div class="grid grid-cols-1 lg:grid-cols-[400px_1fr] h-screen">
         <section class="lg:bg-stone-900/40 h-fit lg:h-full px-3 py-2">
@@ -249,26 +246,57 @@ export class TuringMachineSimulator {
             <div class="tape">${this.currentTape.render(this.headPosition)}</div>
 
             <div class="flex justify-end mt-4 gap-5 items-center">
-              <span id="halted-message" class="hidden">The machine has halted.</span>
               <button id="next-btn">Next</button>
             </div>
 
-            <p id="explanation" class="max-w-prose mt-5 text-lg">
-              The machine is in state <b class="font-mono">${this.currentState}</b>. The current input is
-              <b class="font-mono">${this.currentTape.read(this.headPosition)}</b>.
-              ${activeStatement == null
-                ? "No statements match the current state and input."
-                : generateExplanationFromStatement(activeStatement[0], activeStatement[1])}
-            </p>
+            <p id="explanation" class="max-w-prose mt-5 text-lg"></p>
           </div>
         </section>
       </div>
     `;
+
+    const activeStatement = this.editor.findActiveStatement(
+      this.currentState,
+      this.currentTape.read(this.headPosition),
+    );
     if (activeStatement != null) {
       this.editor.highlightActiveStatement(this.container, activeStatement[1]);
     }
 
     this.addEventListeners();
+    this.renderExplanation();
+  }
+
+  renderExplanation() {
+    const explanationElement = this.container.querySelector<HTMLParagraphElement>("#explanation");
+    if (!explanationElement) return;
+
+    if (!this.isRunning) {
+      explanationElement.innerHTML = "The machine has halted.";
+      return;
+    }
+
+    const activeStatement = this.editor.findActiveStatement(
+      this.currentState,
+      this.currentTape.read(this.headPosition),
+    );
+
+    explanationElement.innerHTML = `The machine is in state <b class="font-mono">${this.currentState}</b>. The current input is
+    <b class="font-mono">${this.currentTape.read(this.headPosition)}</b>.
+    ${
+      activeStatement == null
+        ? "No statements match the current state and input."
+        : generateExplanationFromStatement(activeStatement[0], activeStatement[1])
+    }`;
+  }
+
+  halt() {
+    this.isRunning = false;
+    const nextBtn = this.container.querySelector("#next-btn");
+    if (nextBtn instanceof HTMLButtonElement) {
+      nextBtn.disabled = true;
+    }
+    this.renderExplanation();
   }
 
   nextStep() {
@@ -290,14 +318,7 @@ export class TuringMachineSimulator {
         this.headPosition += 1;
         break;
       case "H": {
-        const haltedMessageElement = this.container.querySelector("#halted-message");
-        if (haltedMessageElement) {
-          haltedMessageElement.classList.remove("hidden");
-        }
-        const nextBtn = this.container.querySelector("#next-btn");
-        if (nextBtn instanceof HTMLButtonElement) {
-          nextBtn.disabled = true;
-        }
+        this.halt();
         return;
       }
     }
@@ -309,6 +330,7 @@ export class TuringMachineSimulator {
     if (activeStatement) {
       this.editor.highlightActiveStatement(this.container, activeStatement[1]);
     }
+    this.renderExplanation();
   }
 
   rebuildMachine() {
