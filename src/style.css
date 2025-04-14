@@ -66,7 +66,7 @@ input[type="number"] {
     @apply flex flex-col items-center justify-center py-10;
 
     .tape {
-        @apply rounded-md flex border border-gray-500/50;
+        @apply rounded-md flex w-fit mx-auto border border-gray-500/50;
 
         .cell {
             @apply bg-stone-700/50 border-r border-gray-500/50 p-2 size-10 lg:size-15 xl:size-18 inline-flex justify-center items-center text-2xl font-medium;

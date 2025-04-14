@@ -33,23 +33,28 @@ class ProgramEditor {
     return s;
   }
 
-  highlightActiveStatement(container: HTMLElement, currentState: string, input: string) {
+  findActiveStatement(currentState: string, input: string): [ProgramStatement, number] | null {
+    for (let i = 0; i < this.statements.length; i++) {
+      const statement = this.statements[i];
+      if (statement.currentState === currentState && statement.input === input) {
+        return [statement, i];
+      }
+    }
+    return null;
+  }
+
+  highlightActiveStatement(container: HTMLElement, statementIndex: number) {
     this.activeStatement = null;
     const previousActiveStatement = container.querySelector(".program-editor .statement.active");
     if (previousActiveStatement) {
       previousActiveStatement.classList.remove("active");
     }
 
-    for (let i = 0; i < this.statements.length; i++) {
-      const statement = this.statements[i];
-      if (statement.currentState === currentState && statement.input === input) {
-        this.activeStatement = statement;
-        const statementElement = container.querySelector(`.statement#${statement.currentState}-${statement.input}`);
-        if (statementElement) {
-          statementElement.classList.add("active");
-        }
-        break;
-      }
+    const statement = this.statements[statementIndex];
+    this.activeStatement = statement;
+    const statementElement = container.querySelector(`.statement#${statement.currentState}-${statement.input}`);
+    if (statementElement) {
+      statementElement.classList.add("active");
     }
   }
 }
@@ -99,6 +104,16 @@ class Tape {
       newHead.classList.add("head");
     }
   }
+}
+
+function generateExplanationFromStatement(statement: ProgramStatement, index: number): string {
+  return html`Based on these, the machine will execute the statement
+    <span class="font-mono">${(index + 1).toString().padStart(2, "0")}</span>.<br />
+    The next state will be <span class="font-mono">${statement.nextState}</span>.<br />
+    "${statement.output}" will be written to the tape. After that,
+    ${statement.action === "H"
+      ? "the machine will halt."
+      : `the head will move <span class="font-mono">${statement.action === "R" ? "right" : "left"}</span>.`}`;
 }
 
 export class TuringMachineSimulator {
@@ -194,6 +209,11 @@ export class TuringMachineSimulator {
       },
     ]);
 
+    const activeStatement = this.editor.findActiveStatement(
+      this.currentState,
+      this.currentTape.read(this.headPosition),
+    );
+
     this.container.innerHTML = html`
       <div class="grid grid-cols-1 lg:grid-cols-[400px_1fr] h-screen">
         <section class="lg:bg-stone-900/40 h-fit lg:h-full px-3 py-2">
@@ -228,20 +248,26 @@ export class TuringMachineSimulator {
             <h2 class="text-xl mb-1 font-medium">Current Tape</h2>
             <div class="tape">${this.currentTape.render(this.headPosition)}</div>
 
-            <div class="flex justify-between gap-5 items-center">
-              <div>
-                <h2 class="text-xl mb-1 mt-4 font-medium">Current State</h2>
-                <span id="current-state" class="font-mono mt-10 mb-4 text-xl"> ${this.currentState} </span>
-              </div>
+            <div class="flex justify-end mt-4 gap-5 items-center">
               <span id="halted-message" class="hidden">The machine has halted.</span>
               <button id="next-btn">Next</button>
             </div>
+
+            <p id="explanation" class="max-w-prose mt-5 text-lg">
+              The machine is in state <b class="font-mono">${this.currentState}</b>. The current input is
+              <b class="font-mono">${this.currentTape.read(this.headPosition)}</b>.
+              ${activeStatement == null
+                ? "No statements match the current state and input."
+                : generateExplanationFromStatement(activeStatement[0], activeStatement[1])}
+            </p>
           </div>
         </section>
       </div>
     `;
+    if (activeStatement != null) {
+      this.editor.highlightActiveStatement(this.container, activeStatement[1]);
+    }
 
-    this.editor.highlightActiveStatement(this.container, this.currentState, this.currentTape.read(this.headPosition));
     this.addEventListeners();
   }
 
@@ -276,7 +302,13 @@ export class TuringMachineSimulator {
       }
     }
     this.currentTape.updateHeadPosition(this.container, this.headPosition);
-    this.editor.highlightActiveStatement(this.container, this.currentState, this.currentTape.read(this.headPosition));
+    const activeStatement = this.editor.findActiveStatement(
+      this.currentState,
+      this.currentTape.read(this.headPosition),
+    );
+    if (activeStatement) {
+      this.editor.highlightActiveStatement(this.container, activeStatement[1]);
+    }
   }
 
   rebuildMachine() {
@@ -304,7 +336,14 @@ export class TuringMachineSimulator {
 
     if (this.currentState !== initialState) {
       this.currentState = initialState;
-      this.editor.highlightActiveStatement(this.container, this.currentState, this.currentTape.read(this.headPosition));
+
+      const activeStatement = this.editor.findActiveStatement(
+        this.currentState,
+        this.currentTape.read(this.headPosition),
+      );
+      if (activeStatement) {
+        this.editor.highlightActiveStatement(this.container, activeStatement[1]);
+      }
     } else {
       this.currentState = initialState;
     }
