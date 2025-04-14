@@ -1,86 +1,86 @@
 @import "tailwindcss";
 
 :root {
-    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    font-weight: 400;
+	font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	font-weight: 400;
 
-    color-scheme: light dark;
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
+	color-scheme: light dark;
+	color: rgba(255, 255, 255, 0.87);
+	background-color: #242424;
 
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 main {
-    @apply contents;
+	@apply contents;
 }
 
 button {
-    @apply bg-pink-800 py-2 px-5;
-    border-radius: 8px;
-    border: 1px solid transparent;
-    font-size: 1em;
-    font-weight: 500;
-    font-family: inherit;
-    cursor: pointer;
-    transition: border-color 0.25s;
-    touch-action: manipulation;
+	@apply bg-pink-800 py-2 px-5;
+	border-radius: 8px;
+	border: 1px solid transparent;
+	font-size: 1em;
+	font-weight: 500;
+	font-family: inherit;
+	cursor: pointer;
+	transition: border-color 0.25s;
+	touch-action: manipulation;
 
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-    &:focus,
-    &:not(:disabled):hover {
-        @apply border-pink-500/60;
-    }
-    &:focus-visible {
-        outline: 4px auto -webkit-focus-ring-color;
-    }
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	&:focus,
+	&:not(:disabled):hover {
+		@apply border-pink-500/60;
+	}
+	&:focus-visible {
+		outline: 4px auto -webkit-focus-ring-color;
+	}
 }
 
 input[type="text"],
 input[type="number"] {
-    @apply rounded-md bg-stone-700/50;
+	@apply rounded-md bg-stone-700/50;
 }
 
 .program-editor {
-    @apply font-mono;
-    .statement {
-        @apply py-1 px-2 lg:py-2 mt-1 lg:mt-2 rounded-md bg-stone-700/50;
+	@apply font-mono;
+	.statement {
+		@apply py-1 px-2 lg:py-2 mt-1 lg:mt-2 rounded-md bg-stone-700/50;
 
-        &.active {
-            @apply bg-pink-400/20;
-        }
+		&.active {
+			@apply bg-pink-400/20;
+		}
 
-        span {
-            @apply opacity-50 mr-2;
-        }
-    }
+		span {
+			@apply opacity-50 mr-2;
+		}
+	}
 }
 
 .canvas {
-    @apply flex flex-col items-center justify-center py-10;
+	@apply flex flex-col items-center justify-center py-10;
 
-    .tape {
-        @apply rounded-md flex w-fit mx-auto border border-gray-500/50;
+	.tape {
+		@apply rounded-md flex w-fit mx-auto border border-gray-500/50;
 
-        .cell {
-            @apply bg-stone-700/50 border-r border-gray-500/50 p-2 size-10 lg:size-15 xl:size-18 inline-flex justify-center items-center text-2xl font-medium font-mono;
+		.cell {
+			@apply bg-stone-700/50 border-r border-gray-500/50 p-2 size-10 lg:size-15 xl:size-18 inline-flex justify-center items-center text-2xl font-medium font-mono;
 
-            &:last-child {
-                border-right: none;
-            }
-            &.head {
-                @apply bg-pink-500/20 border-2 border-pink-700/70 rounded-sm;
-            }
-        }
-    }
+			&:last-child {
+				border-right: none;
+			}
+			&.head {
+				@apply bg-pink-500/20 border-2 border-pink-700/70 rounded-sm;
+			}
+		}
+	}
 
-    #explanation {
-        @apply min-h-[200px];
-    }
+	#explanation {
+		@apply min-h-[200px];
+	}
 }
