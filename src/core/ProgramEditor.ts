@@ -10,8 +10,7 @@ export class ProgramEditor {
 	}
 
 	render(): string {
-		let s = `<div class="program-editor">`;
-
+		let s = "";
 		for (let i = 0; i < this.statements.length; i++) {
 			const statement = this.statements[i];
 			s = s.concat(
@@ -21,8 +20,6 @@ export class ProgramEditor {
         </div>`,
 			);
 		}
-
-		s = s.concat("</div>");
 		return s;
 	}
 

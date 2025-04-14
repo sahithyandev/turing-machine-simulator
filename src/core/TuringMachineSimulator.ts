@@ -24,14 +24,14 @@ export class TuringMachineSimulator {
 	currentTape: Tape;
 	headPosition: number;
 	editor: ProgramEditor;
-	isRunning: boolean;
+	runningState: "idle" | "started" | "halted";
 
 	constructor(container: HTMLElement) {
 		this.container = container;
 		this.currentState = "Q0";
 		this.currentTape = new Tape(["b", "b", "b", "b", "1", "1", "1", "b", "b"]);
 		this.headPosition = 4;
-		this.isRunning = true;
+		this.runningState = "idle";
 
 		this.editor = new ProgramEditor([
 			{
@@ -140,13 +140,11 @@ export class TuringMachineSimulator {
           </div>
 
           <h2 class="text-lg font-medium mt-4 mb-1">Program Editor</h2>
-          ${this.editor.render()}
+          <div class="program-editor">${this.editor.render()}</div>
 
           <button class="mt-auto w-full" id="build-machine-btn">Build machine</button>
         </section>
-        <section class="canvas">
-          <div></div>
-        </section>
+        <section class="canvas"></section>
       </div>
     `;
 
@@ -179,6 +177,16 @@ export class TuringMachineSimulator {
 	}
 
 	highlightActiveStatement() {
+		if (this.runningState !== "started") {
+			const previousActiveStatement = this.container.querySelector(
+				".program-editor .statement.active",
+			);
+			if (previousActiveStatement) {
+				previousActiveStatement.classList.remove("active");
+			}
+			return;
+		}
+
 		const activeStatement = this.editor.findActiveStatement(
 			this.currentState,
 			this.currentTape.read(this.headPosition),
@@ -193,7 +201,7 @@ export class TuringMachineSimulator {
 			this.container.querySelector<HTMLParagraphElement>("#explanation");
 		if (!explanationElement) return;
 
-		if (!this.isRunning) {
+		if (this.runningState === "halted") {
 			explanationElement.innerHTML = "The machine has halted.";
 			return;
 		}
@@ -215,8 +223,14 @@ export class TuringMachineSimulator {
 		}`;
 	}
 
+	reset() {
+		this.runningState = "idle";
+		this.renderEmptyCanvas();
+		this.highlightActiveStatement();
+	}
+
 	halt() {
-		this.isRunning = false;
+		this.runningState = "halted";
 		const nextBtn = this.container.querySelector("#next-btn");
 		if (nextBtn instanceof HTMLButtonElement) {
 			nextBtn.disabled = true;
@@ -285,6 +299,8 @@ export class TuringMachineSimulator {
 		}
 
 		this.currentState = initialState;
+
+		this.runningState = "started";
 		this.renderMachine();
 		this.highlightActiveStatement();
 		this.renderExplanation();
@@ -293,7 +309,20 @@ export class TuringMachineSimulator {
 	addEventListeners() {
 		const buildMachineBtn = this.container.querySelector("#build-machine-btn");
 		if (buildMachineBtn instanceof HTMLButtonElement) {
-			buildMachineBtn.addEventListener("click", () => this.buildMachine());
+			buildMachineBtn.addEventListener("click", () => {
+				switch (this.runningState) {
+					case "halted":
+						return;
+					case "idle":
+						this.buildMachine();
+						buildMachineBtn.innerHTML = "Reset";
+						break;
+					case "started":
+						this.reset();
+						buildMachineBtn.innerHTML = "Build machine";
+						break;
+				}
+			});
 		}
 	}
 }
