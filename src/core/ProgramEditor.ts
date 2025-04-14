@@ -9,16 +9,34 @@ export class ProgramEditor {
 		this.statements = initialStatements;
 	}
 
-	render(): string {
+	render(mode: "editable" | "readonly"): string {
 		let s = "";
 		for (let i = 0; i < this.statements.length; i++) {
 			const statement = this.statements[i];
-			s = s.concat(
-				html`<div class="statement" id="${statement.currentState}-${statement.input}">
-          <span>${(i + 1).toString().padStart(2, "0")}</span>
-          ${statement.currentState} ${statement.input} : ${statement.nextState} ${statement.output} ${statement.action}
-        </div>`,
-			);
+
+			switch (mode) {
+				case "readonly":
+					s = s.concat(
+						html`<div class="statement" id="${statement.currentState}-${statement.input}">
+              <span>${(i + 1).toString().padStart(2, "0")}</span>
+              ${statement.currentState} ${statement.input} : ${statement.nextState} ${statement.output}
+              ${statement.action}
+            </div>`,
+					);
+					break;
+				case "editable":
+					s = s.concat(
+						html`<div class="statement" id="${statement.currentState}-${statement.input}">
+              <span>${(i + 1).toString().padStart(2, "0")}</span>
+              <input
+                data-index="${i}"
+                type="text"
+                value="${statement.currentState} ${statement.input} : ${statement.nextState} ${statement.output} ${statement.action}"
+              />
+            </div>`,
+					);
+					break;
+			}
 		}
 		return s;
 	}
@@ -56,5 +74,31 @@ export class ProgramEditor {
 		if (statementElement) {
 			statementElement.classList.add("active");
 		}
+	}
+
+	static parseProgramStatementInput(input: string): null | ProgramStatement {
+		const separatedByColon = input.split(":");
+		if (separatedByColon.length !== 2) return null;
+
+		const inputConditions = separatedByColon[0].trim().split(" ");
+		if (inputConditions.length !== 2) return null;
+
+		const outputConditions = separatedByColon[1].trim().split(" ");
+		if (outputConditions.length !== 3) return null;
+
+		if (
+			outputConditions[2] !== "H" &&
+			outputConditions[2] !== "R" &&
+			outputConditions[2] !== "L"
+		)
+			return null;
+
+		return {
+			currentState: inputConditions[0],
+			input: inputConditions[1],
+			nextState: outputConditions[0],
+			output: outputConditions[1],
+			action: outputConditions[2],
+		};
 	}
 }

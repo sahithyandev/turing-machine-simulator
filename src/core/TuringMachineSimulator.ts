@@ -140,7 +140,7 @@ export class TuringMachineSimulator {
           </div>
 
           <h2 class="text-lg font-medium mt-4 mb-1">Program Editor</h2>
-          <div class="program-editor">${this.editor.render()}</div>
+          <div class="program-editor"></div>
 
           <button class="mt-auto w-full" id="build-machine-btn">Build machine</button>
         </section>
@@ -148,8 +148,23 @@ export class TuringMachineSimulator {
       </div>
     `;
 
-		this.renderEmptyCanvas();
-		this.addEventListeners();
+		const buildMachineBtn = this.container.querySelector("#build-machine-btn");
+		if (buildMachineBtn instanceof HTMLButtonElement) {
+			buildMachineBtn.addEventListener("click", () => {
+				switch (this.runningState) {
+					case "idle":
+						this.buildMachine();
+						buildMachineBtn.innerHTML = "Reset";
+						break;
+					case "halted":
+					case "started":
+						this.reset();
+						buildMachineBtn.innerHTML = "Build machine";
+						break;
+				}
+			});
+		}
+		this.reset();
 	}
 
 	renderEmptyCanvas() {
@@ -174,6 +189,14 @@ export class TuringMachineSimulator {
 		if (nextBtn instanceof HTMLButtonElement) {
 			nextBtn.addEventListener("click", () => this.nextStep());
 		}
+
+		const programEditorElement =
+			this.container.querySelector(".program-editor");
+		if (programEditorElement) {
+			programEditorElement.innerHTML = this.editor.render("readonly");
+		}
+		this.highlightActiveStatement();
+		this.renderExplanation();
 	}
 
 	highlightActiveStatement() {
@@ -225,6 +248,29 @@ export class TuringMachineSimulator {
 
 	reset() {
 		this.runningState = "idle";
+
+		const programEditorElement =
+			this.container.querySelector(".program-editor");
+		if (programEditorElement instanceof HTMLElement) {
+			programEditorElement.innerHTML = this.editor.render("editable");
+
+			programEditorElement.addEventListener("input", (e) => {
+				const target = e.target;
+				if (!(target instanceof HTMLInputElement)) return;
+				const index = target.dataset.index;
+				if (typeof index === "undefined") return;
+				const indexParsed = Number.parseInt(index);
+				if (Number.isNaN(indexParsed)) return;
+
+				const parsed = ProgramEditor.parseProgramStatementInput(target.value);
+				if (parsed === null) {
+					// TODO: show invalid state
+					return;
+				}
+				this.editor.statements[indexParsed] = parsed;
+			});
+		}
+
 		this.renderEmptyCanvas();
 		this.highlightActiveStatement();
 	}
@@ -302,27 +348,5 @@ export class TuringMachineSimulator {
 
 		this.runningState = "started";
 		this.renderMachine();
-		this.highlightActiveStatement();
-		this.renderExplanation();
-	}
-
-	addEventListeners() {
-		const buildMachineBtn = this.container.querySelector("#build-machine-btn");
-		if (buildMachineBtn instanceof HTMLButtonElement) {
-			buildMachineBtn.addEventListener("click", () => {
-				switch (this.runningState) {
-					case "halted":
-						return;
-					case "idle":
-						this.buildMachine();
-						buildMachineBtn.innerHTML = "Reset";
-						break;
-					case "started":
-						this.reset();
-						buildMachineBtn.innerHTML = "Build machine";
-						break;
-				}
-			});
-		}
 	}
 }

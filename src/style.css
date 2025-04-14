@@ -18,46 +18,63 @@ main {
 	@apply contents;
 }
 
-button {
-	@apply bg-pink-800 py-2 px-5;
-	border-radius: 8px;
-	border: 1px solid transparent;
-	font-size: 1em;
-	font-weight: 500;
-	font-family: inherit;
-	cursor: pointer;
-	transition: border-color 0.25s;
-	touch-action: manipulation;
+@layer base {
+	button {
+		@apply bg-pink-800 py-2 px-5 transition-colors;
+		border-radius: 8px;
+		border: 1px solid transparent;
+		font-size: 1em;
+		font-weight: 500;
+		font-family: inherit;
+		cursor: pointer;
+		transition: border-color 0.25s;
+		touch-action: manipulation;
 
-	&:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
+		&:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+		}
+		&:focus,
+		&:not(:disabled):hover {
+			@apply border-pink-500/60;
+		}
+		&:focus-visible {
+			outline: 4px auto -webkit-focus-ring-color;
+		}
 	}
-	&:focus,
-	&:not(:disabled):hover {
-		@apply border-pink-500/60;
-	}
-	&:focus-visible {
-		outline: 4px auto -webkit-focus-ring-color;
-	}
-}
 
-input[type="text"],
-input[type="number"] {
-	@apply rounded-md bg-stone-700/50;
+	input[type="text"],
+	input[type="number"] {
+		@apply rounded-md bg-stone-700/50;
+	}
 }
 
 .program-editor {
 	@apply font-mono;
 	.statement {
-		@apply py-1 px-2 lg:py-2 mt-1 lg:mt-2 rounded-md bg-stone-700/50;
+		@apply mt-1 flex pl-2 lg:mt-2 rounded-md bg-stone-700/50 items-center;
+
+		&:not(:has(input)) {
+			@apply py-0.5 lg:py-1.5 pr-2;
+
+			span {
+				@apply mr-4;
+			}
+		}
 
 		&.active {
 			@apply bg-pink-400/20;
 		}
 
 		span {
-			@apply opacity-50 mr-2;
+			@apply opacity-50;
+		}
+		input {
+			@apply py-0.5 lg:py-1.5 pl-2 flex-1 bg-transparent;
+		}
+		.statement-content,
+		input {
+			@apply ml-2;
 		}
 	}
 }
