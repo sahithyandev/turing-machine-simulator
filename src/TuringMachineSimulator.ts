@@ -255,6 +255,12 @@ export class TuringMachineSimulator {
       </div>
     `;
 
+    this.addEventListeners();
+    this.renderExplanation();
+    this.highlightActiveStatement();
+  }
+
+  highlightActiveStatement() {
     const activeStatement = this.editor.findActiveStatement(
       this.currentState,
       this.currentTape.read(this.headPosition),
@@ -262,9 +268,6 @@ export class TuringMachineSimulator {
     if (activeStatement != null) {
       this.editor.highlightActiveStatement(this.container, activeStatement[1]);
     }
-
-    this.addEventListeners();
-    this.renderExplanation();
   }
 
   renderExplanation() {
@@ -323,13 +326,8 @@ export class TuringMachineSimulator {
       }
     }
     this.currentTape.updateHeadPosition(this.container, this.headPosition);
-    const activeStatement = this.editor.findActiveStatement(
-      this.currentState,
-      this.currentTape.read(this.headPosition),
-    );
-    if (activeStatement) {
-      this.editor.highlightActiveStatement(this.container, activeStatement[1]);
-    }
+
+    this.highlightActiveStatement();
     this.renderExplanation();
   }
 
@@ -359,13 +357,7 @@ export class TuringMachineSimulator {
     if (this.currentState !== initialState) {
       this.currentState = initialState;
 
-      const activeStatement = this.editor.findActiveStatement(
-        this.currentState,
-        this.currentTape.read(this.headPosition),
-      );
-      if (activeStatement) {
-        this.editor.highlightActiveStatement(this.container, activeStatement[1]);
-      }
+      this.highlightActiveStatement();
     } else {
       this.currentState = initialState;
     }
