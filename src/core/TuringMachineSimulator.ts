@@ -91,7 +91,6 @@ export class TuringMachineSimulator {
 		}
 
 		this.reset();
-		this.buildMachine();
 	}
 
 	renderEmptyCanvas() {
