@@ -173,12 +173,7 @@ export class TuringMachineSimulator {
 		if (addStatementBtn) {
 			addStatementBtn.addEventListener("click", () => {
 				this.editor.addStatement(undefined);
-
-				const programEditorElement =
-					this.container.querySelector(".program-editor");
-				if (programEditorElement instanceof HTMLElement) {
-					programEditorElement.innerHTML = this.editor.render("editable");
-				}
+				this.renderProgramEditor();
 			});
 		}
 
@@ -208,11 +203,7 @@ export class TuringMachineSimulator {
 			nextBtn.addEventListener("click", () => this.nextStep());
 		}
 
-		const programEditorElement =
-			this.container.querySelector(".program-editor");
-		if (programEditorElement) {
-			programEditorElement.innerHTML = this.editor.render("readonly");
-		}
+		this.renderProgramEditor();
 		this.highlightActiveStatement();
 		this.renderExplanation();
 	}
@@ -264,30 +255,60 @@ export class TuringMachineSimulator {
 		}`;
 	}
 
-	reset() {
-		this.runningState = "idle";
+	deleteStatement(statementIndex: number) {
+		const shouldUpdate = this.editor.removeStatement(statementIndex);
+		if (!shouldUpdate) return;
+		this.renderProgramEditor();
+	}
 
+	renderProgramEditor(shouldAddListeners = false) {
 		const programEditorElement =
 			this.container.querySelector(".program-editor");
-		if (programEditorElement instanceof HTMLElement) {
+		if (!programEditorElement) return;
+
+		if (this.runningState === "started") {
+			programEditorElement.innerHTML = this.editor.render("readonly");
+		} else if (this.runningState === "idle") {
 			programEditorElement.innerHTML = this.editor.render("editable");
 
-			programEditorElement.addEventListener("input", (e) => {
-				const target = e.target;
-				if (!(target instanceof HTMLInputElement)) return;
-				const index = target.dataset.index;
-				if (typeof index === "undefined") return;
-				const indexParsed = Number.parseInt(index);
-				if (Number.isNaN(indexParsed)) return;
+			if (shouldAddListeners) {
+				programEditorElement.addEventListener("click", (event) => {
+					const target = event.target;
+					if (!(target instanceof HTMLElement || target instanceof SVGElement))
+						return;
+					const btn = target.closest(".delete-statement-btn");
+					if (!(btn instanceof HTMLButtonElement)) return;
 
-				const parsed = ProgramEditor.parseProgramStatementInput(target.value);
-				if (parsed === null) {
-					// TODO: show invalid state
-					return;
-				}
-				this.editor.statements[indexParsed] = parsed;
-			});
+					const index = btn.dataset.index;
+					if (index === undefined) return;
+					const parsedIndex = Number.parseInt(index);
+					if (Number.isNaN(parsedIndex)) return;
+
+					this.deleteStatement(parsedIndex);
+				});
+
+				programEditorElement.addEventListener("input", (e) => {
+					const target = e.target;
+					if (!(target instanceof HTMLInputElement)) return;
+					const index = target.dataset.index;
+					if (typeof index === "undefined") return;
+					const indexParsed = Number.parseInt(index);
+					if (Number.isNaN(indexParsed)) return;
+
+					const parsed = ProgramEditor.parseProgramStatementInput(target.value);
+					if (parsed === null) {
+						// TODO: show invalid state
+						return;
+					}
+					this.editor.statements[indexParsed] = parsed;
+				});
+			}
 		}
+	}
+
+	reset() {
+		this.runningState = "idle";
+		this.renderProgramEditor(true);
 
 		const programEditorControlsElement = this.container.querySelector(
 			".program-editor-controls",
@@ -307,6 +328,7 @@ export class TuringMachineSimulator {
 			nextBtn.disabled = true;
 		}
 		this.renderExplanation();
+		this.highlightActiveStatement();
 	}
 
 	nextStep() {
