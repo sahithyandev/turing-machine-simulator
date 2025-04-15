@@ -9,10 +9,43 @@ export class ProgramEditor {
 		this.statements = initialStatements;
 	}
 
+	addStatement(statement: ProgramStatement, index = -1) {
+		if (
+			statement === undefined ||
+			index < 0 ||
+			index >= this.statements.length
+		) {
+			this.statements.push(statement);
+			return;
+		}
+		this.statements[index] = statement;
+	}
+
 	render(mode: "editable" | "readonly"): string {
 		let s = "";
 		for (let i = 0; i < this.statements.length; i++) {
 			const statement = this.statements[i];
+
+			if (statement === undefined) {
+				switch (mode) {
+					case "readonly":
+						s = s.concat(
+							html`<div class="statement" id="statement-${i}">
+                <span>${(i + 1).toString().padStart(2, "0")}</span>
+              </div>`,
+						);
+						break;
+					case "editable":
+						s = s.concat(
+							html`<div class="statement" id="statement-${i}">
+                <span>${(i + 1).toString().padStart(2, "0")}</span>
+                <input data-index="${i}" type="text" value="" placeholder="" />
+              </div>`,
+						);
+						break;
+				}
+				continue;
+			}
 
 			switch (mode) {
 				case "readonly":
@@ -47,6 +80,7 @@ export class ProgramEditor {
 	): [ProgramStatement, number] | null {
 		for (let i = 0; i < this.statements.length; i++) {
 			const statement = this.statements[i];
+			if (statement === undefined) continue;
 			if (
 				statement.currentState === currentState &&
 				statement.input === input
@@ -67,6 +101,7 @@ export class ProgramEditor {
 		}
 
 		const statement = this.statements[statementIndex];
+		if (statement === undefined) return;
 		this.activeStatement = statement;
 		const statementElement = container.querySelector(
 			`.statement#${statement.currentState}-${statement.input}`,

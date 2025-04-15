@@ -78,6 +78,17 @@ main {
 		}
 	}
 }
+.program-editor-controls {
+	@apply mt-1.5 transition-opacity duration-150;
+
+	&.hide {
+		@apply pointer-events-none opacity-0;
+	}
+
+	button {
+		@apply w-full py-1 bg-transparent border-pink-600 hover:bg-pink-700/20;
+	}
+}
 
 .canvas {
 	@apply flex flex-col items-center justify-center py-10;

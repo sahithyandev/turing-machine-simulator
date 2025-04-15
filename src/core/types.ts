@@ -1,7 +1,9 @@
-export interface ProgramStatement {
-	currentState: string;
-	input: string;
-	nextState: string;
-	output: string;
-	action: "R" | "L" | "H";
-}
+export type ProgramStatement =
+	| undefined
+	| {
+			currentState: string;
+			input: string;
+			nextState: string;
+			output: string;
+			action: "R" | "L" | "H";
+	  };

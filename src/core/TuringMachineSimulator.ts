@@ -7,6 +7,7 @@ function generateExplanationFromStatement(
 	statement: ProgramStatement,
 	index: number,
 ): string {
+	if (statement === undefined) return "";
 	return html`Based on these, the machine will execute the statement
     <span class="font-mono">${(index + 1).toString().padStart(2, "0")}</span>.<br />
     The next state will be <span class="font-mono">${statement.nextState}</span>.<br />
@@ -141,6 +142,9 @@ export class TuringMachineSimulator {
 
           <h2 class="text-lg font-medium mt-4 mb-1">Program Editor</h2>
           <div class="program-editor"></div>
+          <div class="program-editor-controls">
+            <button id="add-statement-btn">Add</button>
+          </div>
 
           <button class="mt-auto w-full" id="build-machine-btn">Build machine</button>
         </section>
@@ -164,6 +168,20 @@ export class TuringMachineSimulator {
 				}
 			});
 		}
+
+		const addStatementBtn = this.container.querySelector("#add-statement-btn");
+		if (addStatementBtn) {
+			addStatementBtn.addEventListener("click", () => {
+				this.editor.addStatement(undefined);
+
+				const programEditorElement =
+					this.container.querySelector(".program-editor");
+				if (programEditorElement instanceof HTMLElement) {
+					programEditorElement.innerHTML = this.editor.render("editable");
+				}
+			});
+		}
+
 		this.reset();
 	}
 
@@ -271,6 +289,13 @@ export class TuringMachineSimulator {
 			});
 		}
 
+		const programEditorControlsElement = this.container.querySelector(
+			".program-editor-controls",
+		);
+		if (programEditorControlsElement) {
+			programEditorControlsElement.classList.remove("hide");
+		}
+
 		this.renderEmptyCanvas();
 		this.highlightActiveStatement();
 	}
@@ -345,8 +370,15 @@ export class TuringMachineSimulator {
 		}
 
 		this.currentState = initialState;
-
 		this.runningState = "started";
+
+		const programEditorControlsElement = this.container.querySelector(
+			".program-editor-controls",
+		);
+		if (programEditorControlsElement) {
+			programEditorControlsElement.classList.add("hide");
+		}
+
 		this.renderMachine();
 	}
 }
