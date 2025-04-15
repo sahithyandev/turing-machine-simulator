@@ -82,10 +82,10 @@ main {
 	}
 }
 .program-editor-controls {
-	@apply mt-1.5 transition-opacity duration-150;
+	@apply mt-1.5 mb-3 transition-opacity duration-150;
 
 	&.hide {
-		@apply pointer-events-none opacity-0;
+		@apply pointer-events-none opacity-0 absolute z-[-10];
 	}
 
 	button {

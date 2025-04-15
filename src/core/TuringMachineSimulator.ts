@@ -28,8 +28,11 @@ export class TuringMachineSimulator {
 
 		this.container.innerHTML = html`
       <div class="grid grid-cols-1 lg:grid-cols-[400px_1fr] h-screen">
-        <section class="lg:bg-stone-900/40 h-fit lg:h-full px-3 py-2 flex flex-col">
-          <h1 class="mb-4 font-semibold text-2xl">Turing Machine Simulator</h1>
+        <section id="control-panel" class="lg:bg-stone-900/40 h-fit lg:h-full px-3 py-2 flex flex-col">
+          <h1 class="font-semibold text-2xl">Turing Machine Simulator</h1>
+          <p class="mb-5 text-lg">
+            Made by <a href="https://sahithyan.dev" class="underline" target="_blank">Sahithyan</a>
+          </p>
 
           <label class="block text-lg font-medium mt-2 mb-1">Initial Tape</label>
           <input
@@ -55,7 +58,7 @@ export class TuringMachineSimulator {
           <h2 class="text-lg font-medium mt-4 mb-1">Program Editor</h2>
           <div class="program-editor"></div>
           <div class="program-editor-controls">
-            <button id="add-statement-btn">Add</button>
+            <button id="add-statement-btn">Add statement</button>
           </div>
 
           <button class="mt-auto w-full" id="build-machine-btn">Build machine</button>
@@ -88,12 +91,13 @@ export class TuringMachineSimulator {
 		}
 
 		this.reset();
+		this.buildMachine();
 	}
 
 	renderEmptyCanvas() {
 		const canvasElement = this.container.querySelector(".canvas");
 		if (!canvasElement) return;
-		canvasElement.innerHTML = html`<p class="text-2xl text-center">
+		canvasElement.innerHTML = html` <p class="text-xl py-40 xl:text-2xl text-center">
       Edit the machine in the control panel.<br />
       Build the machine to visualize it.
     </p>`;
@@ -102,7 +106,7 @@ export class TuringMachineSimulator {
 	renderMachine() {
 		const canvasElement = this.container.querySelector(".canvas");
 		if (!canvasElement) return;
-		canvasElement.innerHTML = html`<div>
+		canvasElement.innerHTML = html`<div class="px-3">
       <h2 class="text-xl mb-1 font-medium">Current Tape</h2>
       <div class="tape">${this.currentTape.render(this.headPosition)}</div>
       <div class="flex justify-end mt-4 gap-5 items-center">
@@ -232,6 +236,15 @@ export class TuringMachineSimulator {
 			programEditorControlsElement.classList.remove("hide");
 		}
 
+		const inputsInSidebar = this.container.querySelectorAll(
+			"#control-panel input",
+		);
+		for (let i = 0; i < inputsInSidebar.length; i++) {
+			const inputElement = inputsInSidebar.item(i);
+			if (inputElement instanceof HTMLInputElement) {
+				inputElement.disabled = false;
+			}
+		}
 		this.renderEmptyCanvas();
 		this.highlightActiveStatement();
 	}
@@ -308,6 +321,15 @@ export class TuringMachineSimulator {
 		const tape = this.container.querySelector(".tape");
 		if (tape) {
 			tape.innerHTML = this.currentTape.render(this.headPosition);
+		}
+		const inputsInSidebar = this.container.querySelectorAll(
+			"#control-panel input",
+		);
+		for (let i = 0; i < inputsInSidebar.length; i++) {
+			const inputElement = inputsInSidebar.item(i);
+			if (inputElement instanceof HTMLInputElement) {
+				inputElement.disabled = true;
+			}
 		}
 
 		this.currentState = initialState;
