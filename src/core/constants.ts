@@ -1,6 +1,7 @@
 import type { ProgramStatement } from "./ProgramStatement";
 
 export const INITIAL_STATE = "Q0";
+export const INITIAL_HEAD_POSITION = 4;
 export const INITIAL_TAPE_INPUT = ["b", "b", "b", "b", "1", "1", "1", "b", "b"];
 export const INITIAL_PROGRAM_STATEMENTS: Array<ProgramStatement> = [
 	{

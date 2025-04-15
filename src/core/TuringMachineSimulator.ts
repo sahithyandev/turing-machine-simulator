@@ -3,6 +3,7 @@ import { ProgramEditor } from "./ProgramEditor";
 import { generateExplanation } from "./ProgramStatement";
 import { Tape } from "./Tape";
 import {
+	INITIAL_HEAD_POSITION,
 	INITIAL_PROGRAM_STATEMENTS,
 	INITIAL_STATE,
 	INITIAL_TAPE_INPUT,
@@ -20,7 +21,7 @@ export class TuringMachineSimulator {
 		this.container = container;
 		this.currentState = INITIAL_STATE;
 		this.currentTape = new Tape(INITIAL_TAPE_INPUT);
-		this.headPosition = 4;
+		this.headPosition = INITIAL_HEAD_POSITION;
 		this.runningState = "idle";
 
 		this.editor = new ProgramEditor(INITIAL_PROGRAM_STATEMENTS);
@@ -69,12 +70,10 @@ export class TuringMachineSimulator {
 				switch (this.runningState) {
 					case "idle":
 						this.buildMachine();
-						buildMachineBtn.innerHTML = "Reset";
 						break;
 					case "halted":
 					case "started":
 						this.reset();
-						buildMachineBtn.innerHTML = "Build machine";
 						break;
 				}
 			});
@@ -218,6 +217,11 @@ export class TuringMachineSimulator {
 	}
 
 	reset() {
+		const buildMachineBtn = this.container.querySelector("#build-machine-btn");
+		if (buildMachineBtn) {
+			buildMachineBtn.innerHTML = "Build machine";
+		}
+
 		this.runningState = "idle";
 		this.renderProgramEditor(true);
 
@@ -276,6 +280,11 @@ export class TuringMachineSimulator {
 	}
 
 	buildMachine() {
+		const buildMachineBtn = this.container.querySelector("#build-machine-btn");
+		if (buildMachineBtn instanceof HTMLButtonElement) {
+			buildMachineBtn.innerHTML = "Reset";
+		}
+
 		const initialTapeInputElement =
 			this.container.querySelector("#initial-tape");
 		if (!(initialTapeInputElement instanceof HTMLInputElement)) return;
