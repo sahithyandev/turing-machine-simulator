@@ -1,5 +1,5 @@
 import { html } from "../utils";
-import type { ProgramStatement } from "./types";
+import type { ProgramStatement } from "./ProgramStatement";
 
 export class ProgramEditor {
 	statements: Array<ProgramStatement>;

@@ -1,23 +1,12 @@
 import { html } from "../utils";
 import { ProgramEditor } from "./ProgramEditor";
+import { generateExplanation } from "./ProgramStatement";
 import { Tape } from "./Tape";
-import type { ProgramStatement } from "./types";
-
-function generateExplanationFromStatement(
-	statement: ProgramStatement,
-	index: number,
-): string {
-	if (statement === undefined) return "";
-	return html`Based on these, the machine will execute the statement
-    <span class="font-mono">${(index + 1).toString().padStart(2, "0")}</span>.<br />
-    The next state will be <span class="font-mono">${statement.nextState}</span>.<br />
-    "${statement.output}" will be written to the tape. After that,
-    ${
-			statement.action === "H"
-				? "the machine will halt."
-				: `the head will move <span class="font-mono">${statement.action === "R" ? "right" : "left"}</span>.`
-		}`;
-}
+import {
+	INITIAL_PROGRAM_STATEMENTS,
+	INITIAL_STATE,
+	INITIAL_TAPE_INPUT,
+} from "./constants";
 
 export class TuringMachineSimulator {
 	container: HTMLElement;
@@ -29,90 +18,12 @@ export class TuringMachineSimulator {
 
 	constructor(container: HTMLElement) {
 		this.container = container;
-		this.currentState = "Q0";
-		this.currentTape = new Tape(["b", "b", "b", "b", "1", "1", "1", "b", "b"]);
+		this.currentState = INITIAL_STATE;
+		this.currentTape = new Tape(INITIAL_TAPE_INPUT);
 		this.headPosition = 4;
 		this.runningState = "idle";
 
-		this.editor = new ProgramEditor([
-			{
-				currentState: "Q0",
-				input: "1",
-				nextState: "Q1",
-				output: "X",
-				action: "L",
-			},
-			{
-				currentState: "Q0",
-				input: "X",
-				nextState: "Q0",
-				output: "X",
-				action: "R",
-			},
-			{
-				currentState: "Q0",
-				input: "Y",
-				nextState: "Q0",
-				output: "Y",
-				action: "R",
-			},
-			{
-				currentState: "Q1",
-				input: "X",
-				nextState: "Q1",
-				output: "X",
-				action: "L",
-			},
-			{
-				currentState: "Q1",
-				input: "Y",
-				nextState: "Q1",
-				output: "Y",
-				action: "L",
-			},
-			{
-				currentState: "Q1",
-				input: "b",
-				nextState: "Q0",
-				output: "Y",
-				action: "R",
-			},
-			{
-				currentState: "Q0",
-				input: "b",
-				nextState: "Q2",
-				output: "b",
-				action: "L",
-			},
-			{
-				currentState: "Q2",
-				input: "X",
-				nextState: "Q2",
-				output: "1",
-				action: "L",
-			},
-			{
-				currentState: "Q2",
-				input: "Y",
-				nextState: "Q2",
-				output: "1",
-				action: "L",
-			},
-			{
-				currentState: "Q2",
-				input: "b",
-				nextState: "Q2",
-				output: "b",
-				action: "R",
-			},
-			{
-				currentState: "Q2",
-				input: "1",
-				nextState: "Q2",
-				output: "1",
-				action: "H",
-			},
-		]);
+		this.editor = new ProgramEditor(INITIAL_PROGRAM_STATEMENTS);
 
 		this.container.innerHTML = html`
       <div class="grid grid-cols-1 lg:grid-cols-[400px_1fr] h-screen">
@@ -183,7 +94,10 @@ export class TuringMachineSimulator {
 	renderEmptyCanvas() {
 		const canvasElement = this.container.querySelector(".canvas");
 		if (!canvasElement) return;
-		canvasElement.innerHTML = html`<div class="text-2xl">Build the machine to visualize it.</div>`;
+		canvasElement.innerHTML = html`<p class="text-2xl text-center">
+      Edit the machine in the control panel.<br />
+      Build the machine to visualize it.
+    </p>`;
 	}
 
 	renderMachine() {
@@ -248,10 +162,7 @@ export class TuringMachineSimulator {
     ${
 			activeStatement == null
 				? "No statements match the current state and input."
-				: generateExplanationFromStatement(
-						activeStatement[0],
-						activeStatement[1],
-					)
+				: generateExplanation(activeStatement[0], activeStatement[1])
 		}`;
 	}
 
@@ -383,7 +294,6 @@ export class TuringMachineSimulator {
 		const initialHeadPosition = initialHeadPositionInputElement.valueAsNumber;
 
 		this.headPosition = initialHeadPosition - 1;
-
 		this.currentTape.value = initialTape.split(",");
 
 		const tape = this.container.querySelector(".tape");
